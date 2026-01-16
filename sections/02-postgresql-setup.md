@@ -113,7 +113,7 @@ GRANT ALL PRIVILEGES ON DATABASE studentdb TO app_user;
 
 ---
 
-# Lab Exercise: Setup
+# Practice: Setup
 
 **Tasks (15 minutes):**
 

@@ -242,9 +242,9 @@ public Page<StudentDTO> getStudentDTOs(int page, int size) {
 
 ---
 
-# Lab Exercise: Pagination & Sorting
+# Practice: Pagination & Sorting
 
-**Tasks (30 minutes):**
+ 
 
 <v-clicks>
 

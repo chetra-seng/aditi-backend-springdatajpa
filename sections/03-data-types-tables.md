@@ -240,9 +240,9 @@ CREATE TABLE students (
 
 ---
 
-# Lab Exercise: Data Types & Tables
+# Practice: Data Types & Tables
 
-**Tasks (30 minutes):**
+ 
 
 <v-clicks>
 

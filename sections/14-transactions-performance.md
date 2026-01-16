@@ -248,9 +248,9 @@ List<StudentDTO> findStudentDTOs(@Param("status") StudentStatus status);
 
 ---
 
-# Lab Exercise: Performance
+# Practice: Performance
 
-**Tasks (30 minutes):**
+ 
 
 <v-clicks>
 

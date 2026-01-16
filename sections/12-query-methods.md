@@ -207,7 +207,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
 ---
 
-# Lab Exercise: Query Methods
+# Practice: Query Methods
 
 **Tasks (45 minutes):**
 

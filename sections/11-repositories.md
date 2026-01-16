@@ -238,9 +238,9 @@ public class StudentService {
 
 ---
 
-# Lab Exercise: Repositories
+# Practice: Repositories
 
-**Tasks (30 minutes):**
+ 
 
 <v-clicks>
 

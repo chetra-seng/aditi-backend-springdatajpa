@@ -145,21 +145,18 @@ Result:
 
 # Join Visualization
 
-```
-      INNER JOIN         LEFT JOIN          RIGHT JOIN
-     ┌───┬───┐          ┌───┬───┐          ┌───┬───┐
-     │   │###│          │###│###│          │###│   │
-     │   │###│          │###│###│          │###│   │
-     └───┴───┘          └───┴───┘          └───┴───┘
-        A B                A B                A B
+<div class="flex justify-center">
+  <img src="./assets/sql-joins.svg" alt="SQL Joins Visualization" style="width: 60%; max-width: 600px;">
+</div>
 
-                    FULL OUTER JOIN
-                      ┌───┬───┐
-                      │###│###│
-                      │###│###│
-                      └───┴───┘
-                         A B
-```
+<v-click>
+
+- **Left Join**: All of Table A + matching rows from B
+- **Right Join**: All of Table B + matching rows from A
+- **Inner Join**: Only rows that match in both tables
+- **Full Outer Join**: All rows from both tables
+
+</v-click>
 
 ---
 
@@ -245,9 +242,9 @@ SELECT * FROM a, b WHERE a.id = b.a_id;
 
 ---
 
-# Lab Exercise: Joins
+# Practice: Joins
 
-**Tasks (30 minutes):**
+ 
 
 <v-clicks>
 

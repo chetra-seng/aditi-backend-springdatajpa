@@ -293,9 +293,9 @@ public class DataLoader implements CommandLineRunner {
 
 ---
 
-# Lab Exercise: Setup & First Entity
+# Practice: Setup & First Entity
 
-**Tasks (30 minutes):**
+ 
 
 <v-clicks>
 

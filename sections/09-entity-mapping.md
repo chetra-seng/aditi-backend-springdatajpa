@@ -245,9 +245,9 @@ public class Student {
 
 ---
 
-# Lab Exercise: Entity Mapping
+# Practice: Entity Mapping
 
-**Tasks (30 minutes):**
+ 
 
 <v-clicks>
 

@@ -286,9 +286,9 @@ ORDER BY ms.month;
 
 ---
 
-# Lab Exercise: Aggregations & Subqueries
+# Practice: Aggregations & Subqueries
 
-**Tasks (30 minutes):**
+ 
 
 <v-clicks>
 

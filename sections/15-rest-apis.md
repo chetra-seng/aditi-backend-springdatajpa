@@ -301,7 +301,7 @@ public class StudentService {
 
 ---
 
-# Lab Exercise: REST API
+# Practice: REST API
 
 **Tasks (45 minutes):**
 

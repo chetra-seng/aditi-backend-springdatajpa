@@ -209,9 +209,9 @@ FROM products;
 
 ---
 
-# Lab Exercise: CRUD
+# Practice: CRUD
 
-**Tasks (30 minutes):**
+ 
 
 <v-clicks>
 

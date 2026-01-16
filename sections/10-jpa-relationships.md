@@ -253,7 +253,7 @@ public class Department {
 
 ---
 
-# Lab Exercise: JPA Relationships
+# Practice: JPA Relationships
 
 **Tasks (45 minutes):**
 
