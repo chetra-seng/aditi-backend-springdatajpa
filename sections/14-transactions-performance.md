@@ -1,3 +1,6 @@
+---
+layout: center
+---
 # Transactions & Performance
 
 ## N+1 Problem and Solutions

@@ -1,82 +1,119 @@
-# Building REST APIs
+# Building REST APIs with Spring Data JPA
 
-## Complete Application Architecture
+## Repository and Service Layer Integration
 
 ---
 
-# Layered Architecture
+# Layered Architecture Review
 
 ```
 ┌─────────────────────────────────────┐
-│           Controller                │  ← HTTP handling
+│           Controller                │  ← You've seen this
 ├─────────────────────────────────────┤
-│            Service                  │  ← Business logic
+│            Service                  │  ← Business logic + transactions
 ├─────────────────────────────────────┤
-│           Repository                │  ← Data access
+│           Repository                │  ← Spring Data JPA
 ├─────────────────────────────────────┤
 │            Database                 │  ← PostgreSQL
 └─────────────────────────────────────┘
 ```
 
+Now we connect repositories to controllers through services
+
 ---
 
-# DTO Pattern
+# DTOs with MapStruct (Review)
 
 ```java
-// Request DTO
-public record CreateStudentRequest(
-    @NotBlank String firstName,
-    @NotBlank String lastName,
-    @Email @NotBlank String email,
-    Long departmentId
-) {}
+// You've seen this - MapStruct generates the mapping
+@Mapper(componentModel = "spring")
+public interface StudentMapper {
+    StudentResponse toResponse(Student student);
+    Student toEntity(CreateStudentRequest request);
+}
+```
 
-// Response DTO
-public record StudentResponse(
-    Long id,
-    String firstName,
-    String lastName,
-    String email,
-    String departmentName,
-    LocalDateTime createdAt
-) {
-    public static StudentResponse from(Student student) {
-        return new StudentResponse(
-            student.getId(),
-            student.getFirstName(),
-            student.getLastName(),
-            student.getEmail(),
-            student.getDepartment() != null ?
-                student.getDepartment().getName() : null,
-            student.getCreatedAt()
-        );
+```java
+// Service uses the mapper
+@Service
+@RequiredArgsConstructor
+public class StudentService {
+    private final StudentRepository studentRepository;
+    private final StudentMapper studentMapper;
+
+    public StudentResponse findById(Long id) {
+        return studentRepository.findById(id)
+            .map(studentMapper::toResponse)
+            .orElseThrow(() -> new RuntimeException("Not found"));
     }
 }
 ```
 
 ---
 
-# Service Layer
+# Alternative: Spring Data Projections
+
+Instead of fetching entity + mapping to DTO, fetch only what you need:
+
+```java
+// Interface projection - Spring Data implements this
+public interface StudentSummary {
+    Long getId();
+    String getFirstName();
+    String getLastName();
+    String getDepartmentName();  // Nested property!
+}
+
+// Repository returns projection directly
+public interface StudentRepository extends JpaRepository<Student, Long> {
+    List<StudentSummary> findByDepartmentId(Long deptId);
+    Optional<StudentSummary> findSummaryById(Long id);
+}
+```
+
+**Benefit:** Only SELECTs the columns you need
+
+---
+
+# Projection vs DTO
+
+| Approach | When to Use |
+|----------|-------------|
+| **DTO + MapStruct** | Complex transformations, reusable across layers |
+| **Projection** | Simple read-only views, performance-critical queries |
+
+```java
+// Projection query only selects needed columns
+SELECT s.id, s.first_name, s.last_name, d.name
+FROM student s JOIN department d ...
+
+// Entity query selects everything, then maps
+SELECT * FROM student s JOIN department d ...
+```
+
+---
+
+# Service Layer - Read Operations
 
 ```java
 @Service
-@Transactional(readOnly = true)
+@Transactional(readOnly = true)  // Default: read-only for safety
 @RequiredArgsConstructor
 public class StudentService {
 
     private final StudentRepository studentRepository;
-    private final DepartmentRepository departmentRepository;
+    private final StudentMapper studentMapper;
 
     public List<StudentResponse> findAll() {
         return studentRepository.findAll().stream()
-            .map(StudentResponse::from)
+            .map(studentMapper::toResponse)
             .toList();
     }
 
     public StudentResponse findById(Long id) {
         return studentRepository.findById(id)
-            .map(StudentResponse::from)
-            .orElseThrow(() -> new StudentNotFoundException(id));
+            .map(studentMapper::toResponse)
+            .orElseThrow(() -> new RuntimeException("Not found"));
     }
 }
 ```
@@ -91,176 +128,190 @@ public class StudentService {
 @RequiredArgsConstructor
 public class StudentService {
 
-    @Transactional
-    public StudentResponse create(CreateStudentRequest request) {
-        if (studentRepository.existsByEmail(request.email())) {
-            throw new EmailAlreadyExistsException(request.email());
-        }
+    private final StudentRepository studentRepository;
+    private final DepartmentRepository departmentRepository;
+    private final StudentMapper studentMapper;
 
-        Student student = new Student();
-        student.setFirstName(request.firstName());
-        student.setLastName(request.lastName());
-        student.setEmail(request.email());
+    @Transactional  // Override: this method writes
+    public StudentResponse create(CreateStudentRequest request) {
+        Student student = studentMapper.toEntity(request);
 
         if (request.departmentId() != null) {
-            Department dept = departmentRepository.findById(request.departmentId())
-                .orElseThrow(() -> new DepartmentNotFoundException(request.departmentId()));
+            Department dept = departmentRepository
+                .findById(request.departmentId())
+                .orElseThrow(() -> new RuntimeException("Dept not found"));
             student.setDepartment(dept);
         }
 
-        return StudentResponse.from(studentRepository.save(student));
+        return studentMapper.toResponse(studentRepository.save(student));
     }
 }
 ```
 
 ---
 
-# Controller - GET Operations
+# Why @Transactional on Service Layer?
 
 ```java
-@RestController
-@RequestMapping("/api/students")
-@RequiredArgsConstructor
-public class StudentController {
+@Service
+@Transactional(readOnly = true)  // Class level: all methods read-only
+public class StudentService {
 
-    private final StudentService studentService;
+    // Uses class-level @Transactional(readOnly = true)
+    public StudentResponse findById(Long id) { ... }
 
-    @GetMapping
-    public List<StudentResponse> getAllStudents() {
-        return studentService.findAll();
-    }
+    @Transactional  // Override: this writes to DB
+    public StudentResponse create(CreateStudentRequest req) { ... }
 
-    @GetMapping("/{id}")
-    public StudentResponse getStudent(@PathVariable Long id) {
-        return studentService.findById(id);
-    }
-
-    @GetMapping("/search")
-    public List<StudentResponse> searchStudents(
-        @RequestParam(required = false) String name,
-        @RequestParam(required = false) StudentStatus status
-    ) {
-        return studentService.search(name, status);
-    }
+    @Transactional
+    public void delete(Long id) { ... }
 }
 ```
 
+**Benefits:**
+- Read-only = performance optimization (no dirty checking)
+- Write methods explicitly marked
+- Automatic rollback on exceptions
+
 ---
 
-# Controller - Write Operations
+# Pagination with Spring Data
 
 ```java
-@RestController
-@RequestMapping("/api/students")
-@RequiredArgsConstructor
-public class StudentController {
+// Repository - already supports pagination!
+public interface StudentRepository extends JpaRepository<Student, Long> {
+    Page<Student> findByDepartmentId(Long deptId, Pageable pageable);
+    Page<Student> findByStatus(StudentStatus status, Pageable pageable);
+}
+```
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public StudentResponse createStudent(
-        @Valid @RequestBody CreateStudentRequest request
-    ) {
-        return studentService.create(request);
-    }
+```java
+// Service
+public Page<StudentResponse> findAll(Pageable pageable) {
+    return studentRepository.findAll(pageable)
+        .map(studentMapper::toResponse);  // Page has map()!
+}
 
-    @PutMapping("/{id}")
-    public StudentResponse updateStudent(
-        @PathVariable Long id,
-        @Valid @RequestBody UpdateStudentRequest request
-    ) {
-        return studentService.update(id, request);
-    }
-
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteStudent(@PathVariable Long id) {
-        studentService.delete(id);
-    }
+public Page<StudentResponse> findByDepartment(Long deptId, Pageable pageable) {
+    return studentRepository.findByDepartmentId(deptId, pageable)
+        .map(studentMapper::toResponse);
 }
 ```
 
 ---
 
-# Paginated Endpoint
+# Controller with Pagination - Individual Params
 
 ```java
 @GetMapping
-public Page<StudentResponse> getStudents(
+public PagedResponse<StudentResponse> getStudents(
     @RequestParam(defaultValue = "0") int page,
     @RequestParam(defaultValue = "10") int size,
     @RequestParam(defaultValue = "id") String sortBy,
     @RequestParam(defaultValue = "asc") String direction
 ) {
-    Sort sort = direction.equalsIgnoreCase("desc")
-        ? Sort.by(sortBy).descending()
-        : Sort.by(sortBy).ascending();
-
-    Pageable pageable = PageRequest.of(page, size, sort);
-    return studentService.findAll(pageable);
+    Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+    return PagedResponse.from(studentService.findAll(pageable));
 }
 ```
 
 ---
 
-# Exception Handling
+# Controller with Pagination - Request Object
 
 ```java
-// Custom exception
-public class StudentNotFoundException extends RuntimeException {
-    public StudentNotFoundException(Long id) {
-        super("Student not found with id: " + id);
+@Getter @Setter
+public class PaginationRequest {
+    private int page = 0;
+    private int size = 10;
+    private String sortBy = "id";
+
+    public Pageable toPageable() {
+        return PageRequest.of(page, size, Sort.by(sortBy));
     }
 }
 
-// Global exception handler
-@RestControllerAdvice
-public class GlobalExceptionHandler {
-
-    @ExceptionHandler(StudentNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFound(StudentNotFoundException ex) {
-        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidation(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldErrors().stream()
-            .map(e -> e.getField() + ": " + e.getDefaultMessage())
-            .collect(Collectors.joining(", "));
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
-    }
+@GetMapping
+public PagedResponse<StudentResponse> getStudents(PaginationRequest request) {
+    return PagedResponse.from(studentService.findAll(request.toPageable()));
 }
-
-public record ErrorResponse(int status, String message) {}
 ```
 
 ---
 
-# Validation
+# Default Page Response (Verbose)
+
+```json
+{
+  "content": [...],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 10,
+    "sort": { "empty": false, "sorted": true, "unsorted": false },
+    "offset": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "totalElements": 45,
+  "totalPages": 5,
+  "last": false,
+  "first": true,
+  "size": 10,
+  "number": 0,
+  "sort": { "empty": false, "sorted": true, "unsorted": false },
+  "numberOfElements": 10,
+  "empty": false
+}
+```
+
+Too much redundant info!
+
+---
+
+# Custom Paginated Response
 
 ```java
-public record CreateStudentRequest(
-    @NotBlank(message = "First name is required")
-    @Size(min = 2, max = 50)
-    String firstName,
+@Getter @Setter
+@AllArgsConstructor
+public class PagedResponse<T> {
+    private List<T> content;
+    private Pagination pagination;
 
-    @NotBlank(message = "Last name is required")
-    @Size(min = 2, max = 50)
-    String lastName,
+    public static <T> PagedResponse<T> from(Page<T> page) {
+        return new PagedResponse<>(
+            page.getContent(),
+            new Pagination(page.getNumber(), page.getSize(),
+                           page.getTotalElements(), page.getTotalPages())
+        );
+    }
+}
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
-    String email,
-
-    @Positive(message = "Department ID must be positive")
-    Long departmentId
-) {}
+@Getter @Setter
+@AllArgsConstructor
+public class Pagination {
+    private int page;
+    private int size;
+    private long total;
+    private int totalPages;
+}
 ```
 
 ---
 
-# Complete CRUD Example
+# Custom Response Output
+
+```json
+{
+  "content": [ ... ],
+  "pagination": { "page": 0, "size": 10, "total": 45, "totalPages": 5 }
+}
+```
+
+Much cleaner for frontend!
+
+---
+
+# Complete Service - Setup & Reads
 
 ```java
 @Service
@@ -268,51 +319,62 @@ public record CreateStudentRequest(
 @RequiredArgsConstructor
 public class StudentService {
 
+    private final StudentRepository studentRepository;
+    private final StudentMapper studentMapper;
+
     public Page<StudentResponse> findAll(Pageable pageable) {
-        return studentRepository.findAll(pageable).map(StudentResponse::from);
+        return studentRepository.findAll(pageable)
+            .map(studentMapper::toResponse);
     }
 
-    public StudentResponse findById(Long id) { /* ... */ }
-
-    @Transactional
-    public StudentResponse create(CreateStudentRequest req) { /* ... */ }
-
-    @Transactional
-    public StudentResponse update(Long id, UpdateStudentRequest req) {
-        Student student = studentRepository.findById(id)
-            .orElseThrow(() -> new StudentNotFoundException(id));
-
-        student.setFirstName(req.firstName());
-        student.setLastName(req.lastName());
-        // ... update other fields
-
-        return StudentResponse.from(studentRepository.save(student));
-    }
-
-    @Transactional
-    public void delete(Long id) {
-        if (!studentRepository.existsById(id)) {
-            throw new StudentNotFoundException(id);
-        }
-        studentRepository.deleteById(id);
+    public StudentResponse findById(Long id) {
+        return studentRepository.findById(id)
+            .map(studentMapper::toResponse)
+            .orElseThrow(() -> new RuntimeException("Not found"));
     }
 }
 ```
 
 ---
 
-# Practice: REST API
+# Complete Service - Writes
 
-**Tasks (45 minutes):**
+*Same `StudentService` class, continued:*
+
+```java
+@Transactional
+public StudentResponse create(CreateStudentRequest req) {
+    Student student = studentMapper.toEntity(req);
+    return studentMapper.toResponse(studentRepository.save(student));
+}
+
+@Transactional
+public StudentResponse update(Long id, UpdateStudentRequest req) {
+    Student student = studentRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Not found"));
+    studentMapper.updateEntity(req, student);
+    return studentMapper.toResponse(studentRepository.save(student));
+}
+
+@Transactional
+public void delete(Long id) {
+    studentRepository.deleteById(id);
+}
+```
+
+---
+
+# Practice: Connect the Layers
+
+**Tasks (30 minutes):**
 
 <v-clicks>
 
-1. Create `StudentController` with all CRUD endpoints
-2. Create request/response DTOs
-3. Implement `StudentService` with proper transactions
-4. Add global exception handling
-5. Add validation to request DTOs
-6. Test all endpoints with Postman or curl
+1. Create service layer with `@Transactional`
+2. Use your MapStruct mapper in the service
+3. Add pagination to `findAll()` method
+4. Wire service to controller
+5. Test endpoints with pagination: `?page=0&size=5`
 
 </v-clicks>
 
@@ -322,12 +384,10 @@ public class StudentService {
 
 <v-clicks>
 
-- Use layered architecture: Controller → Service → Repository
-- DTOs separate API from entities
-- Validation with `@Valid` and Bean Validation annotations
-- `@RestControllerAdvice` for global exception handling
-- `@Transactional` on service methods
-- Use `@ResponseStatus` for HTTP status codes
-- Map entities to DTOs in service layer
+- Service layer owns business logic and transactions
+- `@Transactional(readOnly = true)` for reads, `@Transactional` for writes
+- Use MapStruct for DTO mapping, Projections for simple read-only views
+- Spring's `Page<T>` is verbose - wrap in custom `PagedResponse`
+- `Page.map()` transforms entities to DTOs
 
 </v-clicks>

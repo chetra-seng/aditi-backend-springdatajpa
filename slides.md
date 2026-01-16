@@ -9,7 +9,7 @@ favicon: https://spring.io/favicon.svg
 controls: true
 download: true
 info: |
-  ## PostgreSQL & Spring Data JPA - Complete 16-Hour Course
+  ## PostgreSQL & Spring Data JPA
 
   A comprehensive course covering PostgreSQL database fundamentals and Spring Data JPA integration.
   Master SQL queries, database design, entity mapping, and building production-ready Java applications.
@@ -34,8 +34,6 @@ htmlAttrs:
 ---
 
 # PostgreSQL & Spring Data JPA
-
-Complete 16-Hour Course
 
 <div class="pt-12">
   <span class="px-2 py-1">

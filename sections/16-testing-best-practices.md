@@ -1,3 +1,6 @@
+---
+layout: center
+---
 # Testing & Best Practices
 
 ## Quality and Production Readiness
@@ -23,26 +26,16 @@
 ```java
 @DataJpaTest
 class StudentRepositoryTest {
-
-    @Autowired
-    private StudentRepository repository;
-
-    @Autowired
-    private TestEntityManager entityManager;
+    @Autowired private StudentRepository repository;
+    @Autowired private TestEntityManager entityManager;
 
     @Test
     void shouldFindByEmail() {
-        // Given
-        Student student = new Student();
-        student.setFirstName("John");
-        student.setLastName("Doe");
-        student.setEmail("john@test.com");
+        Student student = new Student("John", "Doe", "john@test.com");
         entityManager.persistAndFlush(student);
 
-        // When
         Optional<Student> found = repository.findByEmail("john@test.com");
 
-        // Then
         assertThat(found).isPresent();
         assertThat(found.get().getFirstName()).isEqualTo("John");
     }
@@ -99,13 +92,8 @@ class StudentRepositoryTest {
 @SpringBootTest
 @Testcontainers
 class StudentServiceIntegrationTest {
-
     @Container
-    static PostgreSQLContainer<?> postgres =
-        new PostgreSQLContainer<>("postgres:15")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15");
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -114,13 +102,10 @@ class StudentServiceIntegrationTest {
         registry.add("spring.datasource.password", postgres::getPassword);
     }
 
-    @Autowired
-    private StudentService studentService;
+    @Autowired private StudentService studentService;
 
     @Test
-    void shouldCreateStudent() {
-        // Test with real PostgreSQL in container
-    }
+    void shouldCreateStudent() { /* Test with real PostgreSQL */ }
 }
 ```
 
@@ -131,27 +116,16 @@ class StudentServiceIntegrationTest {
 ```java
 @ExtendWith(MockitoExtension.class)
 class StudentServiceTest {
-
-    @Mock
-    private StudentRepository studentRepository;
-
-    @InjectMocks
-    private StudentService studentService;
+    @Mock private StudentRepository studentRepository;
+    @InjectMocks private StudentService studentService;
 
     @Test
     void shouldFindById() {
-        // Given
-        Student student = new Student();
-        student.setId(1L);
-        student.setFirstName("John");
+        Student student = new Student(1L, "John", "Doe", "john@test.com");
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
 
-        when(studentRepository.findById(1L))
-            .thenReturn(Optional.of(student));
-
-        // When
         StudentResponse response = studentService.findById(1L);
 
-        // Then
         assertThat(response.firstName()).isEqualTo("John");
         verify(studentRepository).findById(1L);
     }
