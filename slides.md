@@ -134,11 +134,11 @@ class: text-center
 
 You now have the skills to build production-ready applications with PostgreSQL and Spring Data JPA
 
-<div class="pt-8">
+<div class="text-left pt-8">
 
 **Resources:**
-- PostgreSQL Docs: postgresql.org/docs
-- Spring Data JPA: spring.io/projects/spring-data-jpa
-- Hibernate: hibernate.org/orm/documentation
+- PostgreSQL Docs: <a href="https://postgresql.org/docs" target="_blank">postgresql.org/docs</a>
+- Spring Data JPA: <a href="https://spring.io/projects/spring-data-jpa" target="_blank">spring.io/projects/spring-data-jpa</a>
+- Hibernate: <a class="https://hibernate.org/orm/documentation" target="_blank">hibernate.org/orm/documentation</a>
 
 </div>

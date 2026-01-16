@@ -345,9 +345,13 @@ class: text-center
 
 # Thank You!
 
+<div class="text-left">
+
 **Resources:**
-- PostgreSQL: postgresql.org/docs
-- Spring Data JPA: spring.io/projects/spring-data-jpa
-- Hibernate: hibernate.org/orm/documentation
+- PostgreSQL: <a href="https://postgresql.org/docs" target="_blank">postgresql.org/docs</a>
+- Spring Data JPA: <a href="https://spring.io/projects/spring-data-jpa" target="_blank">spring.io/projects/spring-data-jpa</a>
+- Hibernate: <a href="https://hibernate.org/orm/documentation" target="_blank">hibernate.org/orm/documentation</a>
+
+</div>
 
 Happy Coding!
