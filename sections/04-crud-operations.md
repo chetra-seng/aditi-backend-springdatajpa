@@ -7,18 +7,18 @@
 # INSERT - Adding Data
 
 ```sql
--- Insert single row
+-- DML: Insert single row
 INSERT INTO employees (first_name, last_name, email)
 VALUES ('John', 'Doe', 'john@example.com');
 
--- Insert multiple rows
+-- DML: Insert multiple rows
 INSERT INTO employees (first_name, last_name, email)
 VALUES
     ('Jane', 'Smith', 'jane@example.com'),
     ('Bob', 'Wilson', 'bob@example.com'),
     ('Alice', 'Brown', 'alice@example.com');
 
--- Insert with RETURNING (get inserted data back)
+-- DML: Insert with RETURNING (get inserted data back)
 INSERT INTO employees (first_name, last_name, email)
 VALUES ('Mike', 'Johnson', 'mike@example.com')
 RETURNING id, first_name, last_name;
@@ -29,13 +29,13 @@ RETURNING id, first_name, last_name;
 # INSERT - Advanced
 
 ```sql
--- Insert from SELECT
+-- DML: Insert from SELECT
 INSERT INTO employee_archive (id, name, email)
 SELECT id, first_name || ' ' || last_name, email
 FROM employees
 WHERE status = 'inactive';
 
--- Upsert (INSERT or UPDATE on conflict)
+-- DML: Upsert (INSERT or UPDATE on conflict)
 INSERT INTO products (sku, name, price)
 VALUES ('ABC123', 'Widget', 9.99)
 ON CONFLICT (sku)
@@ -47,7 +47,7 @@ DO UPDATE SET price = EXCLUDED.price, name = EXCLUDED.name;
 # SELECT - Basic Queries
 
 ```sql
--- Select all columns
+-- DML: Select all columns
 SELECT * FROM employees;
 
 -- Select specific columns
@@ -73,7 +73,7 @@ SELECT * FROM employees LIMIT 10 OFFSET 20;
 # WHERE Clause - Filtering
 
 ```sql
--- Comparison operators
+-- DML: Comparison operators
 SELECT * FROM products WHERE price > 100;
 SELECT * FROM products WHERE price >= 100;
 SELECT * FROM products WHERE price < 100;
@@ -95,7 +95,7 @@ WHERE NOT (price > 100);
 # WHERE - Advanced Operators
 
 ```sql
--- IN operator
+-- DML: IN operator
 SELECT * FROM products
 WHERE category IN ('Electronics', 'Books', 'Toys');
 
@@ -121,7 +121,7 @@ SELECT * FROM employees WHERE manager_id IS NOT NULL;
 # ORDER BY - Sorting
 
 ```sql
--- Ascending order (default)
+-- DML: Ascending order (default)
 SELECT * FROM products ORDER BY name;
 SELECT * FROM products ORDER BY name ASC;
 
@@ -141,7 +141,7 @@ SELECT * FROM employees ORDER BY manager_id NULLS FIRST;
 # UPDATE - Modifying Data
 
 ```sql
--- Update single column
+-- DML: Update single column
 UPDATE employees SET salary = 50000 WHERE id = 1;
 
 -- Update multiple columns
@@ -164,7 +164,7 @@ RETURNING id, first_name, salary;
 # DELETE - Removing Data
 
 ```sql
--- Delete specific rows
+-- DML: Delete specific rows
 DELETE FROM employees WHERE id = 1;
 
 -- Delete with condition
@@ -188,7 +188,7 @@ TRUNCATE TABLE logs;
 # Common Query Patterns
 
 ```sql
--- String concatenation
+-- DML: String concatenation
 SELECT first_name || ' ' || last_name AS full_name
 FROM employees;
 
@@ -226,7 +226,7 @@ FROM products;
 
 ---
 
-# Module 4 Summary
+# Key Takeaways
 
 <v-clicks>
 

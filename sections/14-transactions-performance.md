@@ -265,7 +265,7 @@ List<StudentDTO> findStudentDTOs(@Param("status") StudentStatus status);
 
 ---
 
-# Module 14 Summary
+# Key Takeaways
 
 <v-clicks>
 

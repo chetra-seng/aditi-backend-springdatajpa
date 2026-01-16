@@ -259,7 +259,7 @@ public Page<StudentDTO> getStudentDTOs(int page, int size) {
 
 ---
 
-# Module 13 Summary
+# Key Takeaways
 
 <v-clicks>
 

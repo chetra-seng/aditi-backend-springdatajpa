@@ -20,17 +20,17 @@ With B-tree index: ~20 comparisons
 # Creating Indexes
 
 ```sql
--- Basic index
+-- DDL: Basic index
 CREATE INDEX idx_employees_email ON employees(email);
 
--- Unique index
+-- DDL: Unique index
 CREATE UNIQUE INDEX idx_users_username ON users(username);
 
--- Multi-column (composite) index
+-- DDL: Multi-column (composite) index
 CREATE INDEX idx_orders_customer_date
 ON orders(customer_id, order_date);
 
--- Drop index
+-- DDL: Drop index
 DROP INDEX idx_unused;
 ```
 
@@ -59,10 +59,10 @@ DROP INDEX idx_unused;
 # EXPLAIN - Understanding Query Plans
 
 ```sql
--- Basic explain
+-- DML: Basic explain to see query plan
 EXPLAIN SELECT * FROM employees WHERE email = 'john@example.com';
 
--- With execution stats
+-- DML: With execution stats
 EXPLAIN ANALYZE SELECT * FROM employees WHERE email = 'john@example.com';
 ```
 
@@ -97,15 +97,18 @@ Index Scan using idx_employees_email  (cost=0.29..8.31 rows=1)
 A sequence of operations treated as a single unit of work.
 
 ```sql
-BEGIN;                                    -- Start transaction
+-- TCL: Start transaction
+BEGIN;
 
+-- DML: Modify data within transaction
 UPDATE accounts SET balance = balance - 100 WHERE id = 1;
 UPDATE accounts SET balance = balance + 100 WHERE id = 2;
 
-COMMIT;                                   -- Save changes
+-- TCL: Save changes
+COMMIT;
 
--- Or if something went wrong
-ROLLBACK;                                 -- Undo all changes
+-- TCL: Or if something went wrong, undo all changes
+ROLLBACK;
 ```
 
 ---
@@ -113,17 +116,19 @@ ROLLBACK;                                 -- Undo all changes
 # Transaction Example
 
 ```sql
+-- TCL: Begin transaction
 BEGIN;
 
--- Transfer $100 from account 1 to account 2
+-- DML: Transfer $100 from account 1 to account 2
 UPDATE accounts SET balance = balance - 100 WHERE id = 1;
 UPDATE accounts SET balance = balance + 100 WHERE id = 2;
 
--- Check if source has sufficient funds
+-- DML: Check if source has sufficient funds
 SELECT balance FROM accounts WHERE id = 1;
--- If balance < 0
+-- TCL: If balance < 0
 -- ROLLBACK;
 
+-- TCL: Commit transaction
 COMMIT;
 ```
 
@@ -132,18 +137,24 @@ COMMIT;
 # SAVEPOINT - Partial Rollback
 
 ```sql
+-- TCL: Begin transaction
 BEGIN;
 
+-- DML: Insert order
 INSERT INTO orders (customer_id, total) VALUES (1, 100);
+-- TCL: Create savepoint
 SAVEPOINT order_created;
 
+-- DML: Insert order item
 INSERT INTO order_items (order_id, product_id) VALUES (1, 1);
--- Oops, wrong product
+-- TCL: Oops, wrong product - rollback to savepoint
 ROLLBACK TO SAVEPOINT order_created;
 
+-- DML: Insert correct item
 INSERT INTO order_items (order_id, product_id) VALUES (1, 2);
 
-COMMIT;  -- Order is saved with correct item
+-- TCL: Commit - order is saved with correct item
+COMMIT;
 ```
 
 ---
@@ -151,7 +162,7 @@ COMMIT;  -- Order is saved with correct item
 # Transaction Isolation
 
 ```sql
--- Set isolation level
+-- TCL: Set isolation level
 SET TRANSACTION ISOLATION LEVEL READ COMMITTED;  -- Default
 SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
@@ -168,14 +179,14 @@ SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 # Row Locking
 
 ```sql
--- Lock rows for update
+-- DML: Lock rows for update
 BEGIN;
 SELECT * FROM accounts WHERE id = 1 FOR UPDATE;
 -- Other transactions wait for this row
 UPDATE accounts SET balance = balance + 50 WHERE id = 1;
 COMMIT;
 
--- Skip locked rows (useful for job queues)
+-- DML: Skip locked rows (useful for job queues)
 SELECT * FROM tasks
 WHERE status = 'pending'
 FOR UPDATE SKIP LOCKED

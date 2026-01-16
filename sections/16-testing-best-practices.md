@@ -221,7 +221,7 @@ void shouldCreateStudent() throws Exception {
 
 ---
 
-# Best Practices Summary
+# Key Takeaways
 
 <v-clicks>
 

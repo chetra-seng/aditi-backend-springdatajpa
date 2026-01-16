@@ -313,7 +313,7 @@ public class DataLoader implements CommandLineRunner {
 
 ---
 
-# Module 8 Summary
+# Key Takeaways
 
 <v-clicks>
 

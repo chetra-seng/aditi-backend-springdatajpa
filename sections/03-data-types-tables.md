@@ -31,6 +31,7 @@
 **Best Practice:** Use `TEXT` for most cases; PostgreSQL optimizes it well
 
 ```sql
+-- DDL: Create table with character types
 CREATE TABLE users (
     username VARCHAR(50),  -- When you need a max length
     bio TEXT               -- When length varies widely
@@ -61,14 +62,14 @@ CREATE TABLE users (
 # Boolean and UUID
 
 ```sql
--- Boolean
+-- DDL: Boolean type example
 CREATE TABLE tasks (
     id SERIAL PRIMARY KEY,
     title TEXT,
     completed BOOLEAN DEFAULT FALSE
 );
 
--- UUID (Universally Unique Identifier)
+-- DDL: UUID type example
 CREATE TABLE orders (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     customer_name TEXT,
@@ -81,6 +82,7 @@ CREATE TABLE orders (
 # CREATE TABLE Syntax
 
 ```sql
+-- DDL: Basic CREATE TABLE syntax
 CREATE TABLE table_name (
     column1 data_type [constraints],
     column2 data_type [constraints],
@@ -93,6 +95,7 @@ CREATE TABLE table_name (
 
 **Example:**
 ```sql
+-- DDL: Create table with various constraints
 CREATE TABLE employees (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
@@ -112,13 +115,13 @@ CREATE TABLE employees (
 Uniquely identifies each row in a table.
 
 ```sql
--- Single column
+-- DDL: Single column primary key
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username TEXT
 );
 
--- Composite primary key
+-- DDL: Composite primary key
 CREATE TABLE order_items (
     order_id INTEGER,
     product_id INTEGER,
@@ -134,6 +137,7 @@ CREATE TABLE order_items (
 Creates relationships between tables.
 
 ```sql
+-- DDL: Create tables with foreign key relationship
 CREATE TABLE departments (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL
@@ -151,6 +155,7 @@ CREATE TABLE employees (
 # Foreign Key Actions
 
 ```sql
+-- DDL: Foreign key with ON DELETE and ON UPDATE actions
 CREATE TABLE employees (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -167,13 +172,14 @@ CREATE TABLE employees (
 |--------|-------------|
 | `CASCADE` | Delete/update child rows too |
 | `SET NULL` | Set FK to NULL |
-| `RESTRICT` | Prevent the action |
+| `RESTRICT` | Prevent the action (default) |
 
 ---
 
 # NOT NULL, DEFAULT, UNIQUE
 
 ```sql
+-- DDL: Table with common constraints
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
 
@@ -197,19 +203,19 @@ CREATE TABLE products (
 # Modifying Tables
 
 ```sql
--- Add column
+-- DDL: Add column
 ALTER TABLE employees ADD COLUMN phone VARCHAR(20);
 
--- Drop column
+-- DDL: Drop column
 ALTER TABLE employees DROP COLUMN phone;
 
--- Rename column
+-- DDL: Rename column
 ALTER TABLE employees RENAME COLUMN name TO full_name;
 
--- Add constraint
+-- DDL: Add constraint
 ALTER TABLE employees ADD CONSTRAINT salary_check CHECK (salary > 0);
 
--- Drop table
+-- DDL: Drop table
 DROP TABLE IF EXISTS old_table;
 ```
 
@@ -218,6 +224,7 @@ DROP TABLE IF EXISTS old_table;
 # Complete Example
 
 ```sql
+-- DDL: Complete table definition with all constraint types
 CREATE TABLE students (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
@@ -253,7 +260,7 @@ CREATE TABLE students (
 
 ---
 
-# Module 3 Summary
+# Key Takeaways
 
 <v-clicks>
 

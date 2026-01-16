@@ -264,7 +264,7 @@ public class Student {
 
 ---
 
-# Module 9 Summary
+# Key Takeaways
 
 <v-clicks>
 

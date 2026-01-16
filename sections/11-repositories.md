@@ -255,7 +255,7 @@ public class StudentService {
 
 ---
 
-# Module 11 Summary
+# Key Takeaways
 
 <v-clicks>
 

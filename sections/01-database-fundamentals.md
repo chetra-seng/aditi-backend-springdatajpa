@@ -1,3 +1,6 @@
+---
+layout: center
+---
 # Database Fundamentals
 
 ## Understanding Data Storage
@@ -160,7 +163,7 @@ COMMIT;
 
 ---
 
-# Module 1 Summary
+# Key Takeaways
 
 <v-clicks>
 

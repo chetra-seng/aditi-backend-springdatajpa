@@ -21,7 +21,7 @@
 # Basic Aggregation Examples
 
 ```sql
--- Count all employees
+-- DML: Count all employees
 SELECT COUNT(*) AS total_employees FROM employees;
 
 -- Count employees with email
@@ -47,7 +47,7 @@ FROM employees;
 Groups rows that have the same values.
 
 ```sql
--- Count employees per department
+-- DML: Count employees per department
 SELECT
     department_id,
     COUNT(*) AS employee_count
@@ -68,7 +68,7 @@ GROUP BY product_id;
 # GROUP BY with Joins
 
 ```sql
--- Employee stats by department name
+-- DML: Employee stats by department name
 SELECT
     d.name AS department,
     COUNT(*) AS employee_count,
@@ -87,7 +87,7 @@ ORDER BY total_salary DESC;
 Filters groups (like WHERE, but for aggregates).
 
 ```sql
--- Departments with more than 5 employees
+-- DML: Departments with more than 5 employees
 SELECT
     department_id,
     COUNT(*) AS employee_count
@@ -116,6 +116,7 @@ ORDER BY total_sales DESC;
 | Can't use aggregates | Can use aggregates |
 
 ```sql
+-- DML: WHERE filters rows before GROUP BY, HAVING filters groups after
 SELECT
     department_id,
     AVG(salary) AS avg_salary
@@ -132,7 +133,7 @@ HAVING AVG(salary) > 50000;  -- Then filter groups
 A query nested inside another query.
 
 ```sql
--- Subquery in WHERE clause
+-- DML: Subquery in WHERE clause
 SELECT * FROM products
 WHERE price > (SELECT AVG(price) FROM products);
 
@@ -153,7 +154,7 @@ WHERE avg_prices.avg_price > 100;
 Returns a single value.
 
 ```sql
--- Get employee with highest salary
+-- DML: Scalar subquery - Get employee with highest salary
 SELECT * FROM employees
 WHERE salary = (SELECT MAX(salary) FROM employees);
 
@@ -170,7 +171,7 @@ FROM employees;
 # IN / NOT IN with Subqueries
 
 ```sql
--- Products that have been ordered
+-- DML: Using IN with subquery
 SELECT * FROM products
 WHERE id IN (
     SELECT DISTINCT product_id FROM order_items
@@ -192,7 +193,7 @@ WHERE id NOT IN (
 More efficient than IN for large datasets.
 
 ```sql
--- Customers with at least one order
+-- DML: Using EXISTS for better performance
 SELECT * FROM customers c
 WHERE EXISTS (
     SELECT 1 FROM orders o WHERE o.customer_id = c.id
@@ -212,7 +213,7 @@ WHERE NOT EXISTS (
 References columns from the outer query.
 
 ```sql
--- Employees earning more than their department average
+-- DML: Correlated subquery references outer query
 SELECT * FROM employees e
 WHERE salary > (
     SELECT AVG(salary)
@@ -236,6 +237,7 @@ WHERE order_date = (
 Named temporary result set using WITH clause.
 
 ```sql
+-- DML: Common Table Expression (CTE) for better readability
 WITH department_stats AS (
     SELECT
         department_id,
@@ -258,6 +260,7 @@ WHERE e.salary > ds.avg_salary;
 # Multiple CTEs
 
 ```sql
+-- DML: Multiple CTEs can be chained together
 WITH
 monthly_sales AS (
     SELECT
@@ -299,7 +302,7 @@ ORDER BY ms.month;
 
 ---
 
-# Module 6 Summary
+# Key Takeaways
 
 <v-clicks>
 

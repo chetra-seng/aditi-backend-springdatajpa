@@ -25,6 +25,7 @@ Joins combine rows from two or more tables based on a related column.
 Returns only rows with matching values in both tables.
 
 ```sql
+-- DML: INNER JOIN returns only matching rows
 SELECT
     e.first_name,
     e.last_name,
@@ -55,6 +56,7 @@ employees          departments         Result
 Returns all rows from the left table, plus matching rows from the right.
 
 ```sql
+-- DML: LEFT JOIN returns all from left table
 SELECT
     e.first_name,
     e.last_name,
@@ -85,6 +87,7 @@ Result:
 Returns all rows from the right table, plus matching rows from the left.
 
 ```sql
+-- DML: RIGHT JOIN returns all from right table
 SELECT
     e.first_name,
     d.name AS department
@@ -114,6 +117,7 @@ Result:
 Returns all rows when there's a match in either table.
 
 ```sql
+-- DML: FULL OUTER JOIN returns all rows from both tables
 SELECT
     e.first_name,
     d.name AS department
@@ -164,7 +168,7 @@ Result:
 A table joined with itself.
 
 ```sql
--- Find employees and their managers
+-- DML: Self join - Find employees and their managers
 SELECT
     e.first_name AS employee,
     m.first_name AS manager
@@ -185,6 +189,7 @@ WHERE e1.id < e2.id;  -- Avoid duplicates
 # Multiple Table Joins
 
 ```sql
+-- DML: Join multiple tables
 SELECT
     o.id AS order_id,
     c.name AS customer,
@@ -205,6 +210,7 @@ WHERE o.order_date >= '2024-01-01';
 Returns the Cartesian product (all combinations).
 
 ```sql
+-- DML: CROSS JOIN creates Cartesian product
 SELECT
     p.name AS product,
     c.name AS color
@@ -222,10 +228,10 @@ Use sparingly - can produce very large results!
 
 **1. Use explicit JOIN syntax (not WHERE clause joins)**
 ```sql
--- Good
+-- DML: Good - Explicit JOIN syntax
 SELECT * FROM a JOIN b ON a.id = b.a_id;
 
--- Avoid
+-- DML: Avoid - Implicit join with WHERE
 SELECT * FROM a, b WHERE a.id = b.a_id;
 ```
 
@@ -255,7 +261,7 @@ SELECT * FROM a, b WHERE a.id = b.a_id;
 
 ---
 
-# Module 5 Summary
+# Key Takeaways
 
 <v-clicks>
 

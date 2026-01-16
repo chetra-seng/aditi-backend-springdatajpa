@@ -1,3 +1,6 @@
+---
+layout: center
+---
 # PostgreSQL Setup
 
 ## Installation and First Steps
@@ -80,16 +83,16 @@ psql postgresql://user:password@host:port/database
 # Creating Your First Database
 
 ```sql
--- Create a new database
+-- DDL: Create and manage databases
 CREATE DATABASE studentdb;
 
 -- Connect to it
 \c studentdb
 
--- List databases
+-- DML: Query database list
 SELECT datname FROM pg_database;
 
--- Drop database (careful!)
+-- DDL: Drop database (careful!)
 DROP DATABASE IF EXISTS old_database;
 ```
 
@@ -98,10 +101,10 @@ DROP DATABASE IF EXISTS old_database;
 # Database Users
 
 ```sql
--- Create a user
+-- DCL: Create a user
 CREATE USER app_user WITH PASSWORD 'secure_password';
 
--- Grant privileges
+-- DCL: Grant privileges
 GRANT ALL PRIVILEGES ON DATABASE studentdb TO app_user;
 
 -- List users
@@ -127,7 +130,7 @@ GRANT ALL PRIVILEGES ON DATABASE studentdb TO app_user;
 
 ---
 
-# Module 2 Summary
+# Key Takeaways
 
 <v-clicks>
 

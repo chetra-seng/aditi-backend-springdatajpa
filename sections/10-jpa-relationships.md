@@ -270,7 +270,7 @@ public class Department {
 
 ---
 
-# Module 10 Summary
+# Key Takeaways
 
 <v-clicks>
 

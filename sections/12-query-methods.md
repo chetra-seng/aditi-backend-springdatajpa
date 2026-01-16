@@ -229,7 +229,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
 ---
 
-# Module 12 Summary
+# Key Takeaways
 
 <v-clicks>
 
