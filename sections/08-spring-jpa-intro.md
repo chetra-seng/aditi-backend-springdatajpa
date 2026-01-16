@@ -1,42 +1,9 @@
-# Introduction to Spring & JPA
-
-## Framework Fundamentals
-
 ---
-
-# What is Spring Framework?
-
-Spring is a comprehensive framework for enterprise Java development.
-
-<v-clicks>
-
-**Core Concepts:**
-- Inversion of Control (IoC)
-- Dependency Injection (DI)
-- Aspect-Oriented Programming (AOP)
-
-**Why Spring?**
-- Simplifies Java development
-- Promotes loose coupling
-- Extensive ecosystem
-
-</v-clicks>
-
+layout: center
 ---
+# Spring Data JPA
 
-# What is Spring Boot?
-
-Spring Boot makes it easy to create stand-alone, production-grade Spring applications.
-
-<v-clicks>
-
-- **Convention over Configuration** - Sensible defaults
-- **Embedded Server** - No external server needed
-- **Auto-configuration** - Smart defaults
-- **Production-ready** - Health checks, metrics out of the box
-- **No XML** - Java-based configuration
-
-</v-clicks>
+## Connecting Java to PostgreSQL
 
 ---
 
@@ -51,11 +18,33 @@ Spring Boot makes it easy to create stand-alone, production-grade Spring applica
 └─────────────┘         └─────────────┘
 ```
 
-<v-click>
+---
 
-**JPA is NOT an implementation** — it's a specification!
+# JPA: Specification vs Implementation
 
-</v-click>
+**Specification = Set of Rules/Interfaces**
+
+Think of it like a blueprint or contract:
+
+<v-clicks>
+
+- JPA defines **what** should happen (interfaces like `@Entity`, `EntityManager`)
+- JPA does NOT define **how** it happens (no actual code to save/load data)
+- You **cannot use JPA alone** - you need an implementation!
+
+**Analogy:**
+- JPA = USB specification (defines how USB should work)
+- Hibernate = USB device manufacturer (actually builds working USB devices)
+
+**In Code:**
+```java
+@Entity  // ← This is from JPA (just an interface)
+public class Student { ... }
+
+// But Hibernate actually saves it to the database!
+```
+
+</v-clicks>
 
 ---
 
@@ -317,11 +306,11 @@ public class DataLoader implements CommandLineRunner {
 
 <v-clicks>
 
-- Spring Boot simplifies Java application development
 - JPA is a specification, Hibernate is the implementation
-- Spring Data JPA reduces boilerplate code
+- Spring Data JPA reduces boilerplate code significantly
 - Entities map Java classes to database tables
 - Repositories provide automatic CRUD operations
 - Use `@Entity`, `@Id`, `@GeneratedValue` annotations
+- Configure database connection in `application.properties`
 
 </v-clicks>

@@ -1,3 +1,6 @@
+---
+layout: center
+---
 # Pagination & Sorting
 
 ## Handling Large Datasets
@@ -194,6 +197,8 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     );
 }
 ```
+
+**Note:** `JOIN FETCH` doesn't support automatic count queries. When using `JOIN FETCH` with `Page<T>`, you must provide a separate `countQuery` without the FETCH.
 
 ---
 

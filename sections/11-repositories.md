@@ -1,3 +1,6 @@
+---
+layout: center
+---
 # Spring Data Repositories
 
 ## The Repository Pattern
@@ -206,7 +209,7 @@ String name = studentRepository.findById(id)
 
 ```java
 @Service
-@Transactional(readOnly = true)
+@Transactional(readOnly = true)  // Default: read-only
 public class StudentService {
 
     private final StudentRepository studentRepository;
@@ -215,26 +218,19 @@ public class StudentService {
         this.studentRepository = studentRepository;
     }
 
-    public List<Student> findAll() {
-        return studentRepository.findAll();
-    }
-
     public Student findById(Long id) {
         return studentRepository.findById(id)
             .orElseThrow(() -> new StudentNotFoundException(id));
     }
 
-    @Transactional
+    @Transactional  // Override for write operations
     public Student create(Student student) {
         return studentRepository.save(student);
     }
-
-    @Transactional
-    public void delete(Long id) {
-        studentRepository.deleteById(id);
-    }
 }
 ```
+
+**Key Points:** Constructor injection, `@Transactional` for write operations
 
 ---
 

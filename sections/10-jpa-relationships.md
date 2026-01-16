@@ -1,3 +1,6 @@
+---
+layout: center
+---
 # JPA Relationships
 
 ## OneToOne, OneToMany, ManyToMany
@@ -107,6 +110,25 @@ public class StudentProfile {
 
 # @ManyToMany Relationship
 
+Students can enroll in many courses, courses have many students.
+
+```
+students                student_courses           courses
+┌────┬──────┐          ┌────────┬─────────┐     ┌────┬─────────┐
+│ 1  │ John │─────────▶│ 1      │ 101     │────▶│101 │ Math    │
+│ 2  │ Jane │─────┐    │ 1      │ 102     │  ┌─▶│102 │ Physics │
+└────┴──────┘     │    │ 2      │ 102     │──┘  └────┴─────────┘
+                  └───▶│ 2      │ 103     │
+                       └────────┴─────────┘
+                       Join Table
+```
+
+---
+
+# @ManyToMany - Owner Side
+
+**Student** owns the relationship, defines the join table:
+
 ```java
 @Entity
 public class Student {
@@ -123,7 +145,15 @@ public class Student {
     )
     private Set<Course> courses = new HashSet<>();
 }
+```
 
+---
+
+# @ManyToMany - Inverse Side
+
+**Course** references back with `mappedBy`:
+
+```java
 @Entity
 public class Course {
     @Id
@@ -136,11 +166,17 @@ public class Course {
 }
 ```
 
+<v-click>
+
+**Key Point:** `mappedBy` means "I don't own this, Student does"
+
+</v-click>
+
 ---
 
-# ManyToMany with Extra Columns
+# ManyToMany with Extra Columns - Option 1
 
-When the join table needs additional columns, create an entity:
+**Using Generated ID:**
 
 ```java
 @Entity
@@ -148,7 +184,7 @@ When the join table needs additional columns, create an entity:
 public class Enrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id;  // ← Separate ID
 
     @ManyToOne
     @JoinColumn(name = "student_id")
@@ -165,97 +201,78 @@ public class Enrollment {
 
 ---
 
-# Cascade Types
+# ManyToMany with Extra Columns - Option 2
+
+**Using Composite Key - Step 1:**
+
+Create an `@Embeddable` composite key class:
 
 ```java
-@OneToMany(cascade = CascadeType.ALL)
-```
+@Embeddable
+public class EnrollmentId implements Serializable {
+    private Long studentId;
+    private Long courseId;
 
-| Cascade Type | Description |
-|--------------|-------------|
-| `PERSIST` | Save child when parent is saved |
-| `MERGE` | Update child when parent is updated |
-| `REMOVE` | Delete child when parent is deleted |
-| `REFRESH` | Refresh child when parent is refreshed |
-| `DETACH` | Detach child when parent is detached |
-| `ALL` | All of the above |
+    // Constructor, equals, and hashCode required
+    public EnrollmentId() {}
+
+    public EnrollmentId(Long studentId, Long courseId) {
+        this.studentId = studentId;
+        this.courseId = courseId;
+    }
+
+    // equals() and hashCode() must be implemented
+}
+```
+---
+
+# Composite Key
 
 <v-click>
 
-**Be careful with `REMOVE`** — can cause unintended deletions!
+**Why Composite Key?**
+- Natural key from both foreign keys
+- No extra surrogate ID needed
+- Enforces uniqueness at database level
 
 </v-click>
 
 ---
 
-# Fetch Types
+# ManyToMany with Extra Columns - Option 2 (cont.)
 
-```java
-// EAGER - Load immediately with parent
-@ManyToOne(fetch = FetchType.EAGER)  // Default for @ManyToOne, @OneToOne
+**Using Composite Key - Step 2:**
 
-// LAZY - Load on demand (when accessed)
-@OneToMany(fetch = FetchType.LAZY)   // Default for @OneToMany, @ManyToMany
-```
-
-<v-click>
-
-**Best Practice:**
-- Use `LAZY` for collections (`@OneToMany`, `@ManyToMany`)
-- Use `LAZY` for `@ManyToOne` when not always needed
-- Never use `EAGER` on multiple collections
-
-</v-click>
-
----
-
-# Orphan Removal
+Use the composite key in the entity with `@MapsId`:
 
 ```java
 @Entity
-public class Department {
+public class Enrollment {
+    @EmbeddedId
+    private EnrollmentId id;  // ← Composite key
 
-    @OneToMany(
-        mappedBy = "department",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true  // Delete students when removed from list
-    )
-    private List<Student> students = new ArrayList<>();
-}
+    @ManyToOne
+    @MapsId("studentId")
+    @JoinColumn(name = "student_id")
+    private Student student;
 
-// This will DELETE the student from database
-department.getStudents().remove(student);
-```
+    @ManyToOne
+    @MapsId("courseId")
+    @JoinColumn(name = "course_id")
+    private Course course;
 
----
-
-# Helper Methods for Bidirectional
-
-```java
-@Entity
-public class Department {
-
-    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL)
-    private List<Student> students = new ArrayList<>();
-
-    // Helper method to maintain both sides
-    public void addStudent(Student student) {
-        students.add(student);
-        student.setDepartment(this);
-    }
-
-    public void removeStudent(Student student) {
-        students.remove(student);
-        student.setDepartment(null);
-    }
+    private LocalDate enrollmentDate;
+    private String grade;
 }
 ```
+
+**`@MapsId` links the composite key fields to the entity relationships**
 
 ---
 
 # Practice: JPA Relationships
 
-**Tasks (45 minutes):**
+
 
 <v-clicks>
 
@@ -263,8 +280,7 @@ public class Department {
 2. Add ManyToOne from Student to Department
 3. Create `Course` entity
 4. Create `Enrollment` entity for Student-Course relationship
-5. Add helper methods for bidirectional relationships
-6. Test creating students with departments and enrollments
+5. Test creating students with departments and enrollments
 
 </v-clicks>
 
@@ -280,7 +296,6 @@ public class Department {
 - **Owning side** has the foreign key (no mappedBy)
 - **Inverse side** has mappedBy
 - Always update the owning side
-- Use `LAZY` fetching for collections
 - Use helper methods for bidirectional relationships
 
 </v-clicks>

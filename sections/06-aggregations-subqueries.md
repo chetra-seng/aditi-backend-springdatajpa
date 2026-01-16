@@ -1,3 +1,6 @@
+---
+layout: center
+---
 # Aggregations & Subqueries
 
 ## Summarizing Data and Advanced Queries

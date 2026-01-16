@@ -1,3 +1,6 @@
+---
+layout: center
+---
 # Data Types & Tables
 
 ## PostgreSQL's Type System and Table Design

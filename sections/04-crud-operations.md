@@ -1,3 +1,6 @@
+---
+layout: center
+---
 # CRUD Operations
 
 ## Create, Read, Update, Delete

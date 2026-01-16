@@ -1,32 +1,9 @@
+---
+layout: center
+---
 # Entity Mapping Basics
 
 ## Java Objects to Database Tables
-
----
-
-# Entity Lifecycle States
-
-```
-┌───────────┐    persist()    ┌───────────┐
-│           │ ─────────────►  │           │
-│  TRANSIENT│                 │  MANAGED  │
-│  (New)    │ ◄─────────────  │           │
-└───────────┘    remove()     └─────┬─────┘
-                                    │
-                              detach() / clear()
-                                    │
-                                    ▼
-                              ┌───────────┐
-                              │ DETACHED  │
-                              └─────┬─────┘
-                                    │
-                                merge()
-                                    │
-                                    ▼
-                              ┌───────────┐
-                              │  MANAGED  │
-                              └───────────┘
-```
 
 ---
 
@@ -49,6 +26,8 @@ private String email;
 
 # Data Types Mapping
 
+<div class='text-sm'>
+
 | Java Type | PostgreSQL Type |
 |-----------|-----------------|
 | `String` | VARCHAR / TEXT |
@@ -61,6 +40,8 @@ private String email;
 | `LocalDateTime` | TIMESTAMP |
 | `byte[]` | BYTEA |
 
+
+</div>
 ---
 
 # Temporal Types
@@ -144,29 +125,24 @@ public class Student {
 
 ---
 
-# Auditing Fields
+# Auditing Fields - Manual Approach
 
 ```java
 @Entity
-@Table(name = "students")
 public class Student {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String firstName;
-    private String lastName;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        createdAt = updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
@@ -178,7 +154,9 @@ public class Student {
 
 ---
 
-# Using Spring Data Auditing
+# Auditing Fields - Spring Data Way
+
+**Better approach:** Let Spring handle it automatically!
 
 ```java
 // 1. Enable auditing
@@ -186,16 +164,16 @@ public class Student {
 @EnableJpaAuditing
 public class JpaConfig {}
 
-// 2. Use auditing annotations
+// 2. Add to entity
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Student {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
@@ -211,29 +189,20 @@ public class Student {
 @Entity
 @Table(name = "students")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @EntityListeners(AuditingEntityListener.class)
 public class Student {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false)
     private String firstName;
 
-    @Column(nullable = false, length = 50)
-    private String lastName;
-
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String email;
 
     @Enumerated(EnumType.STRING)
     private StudentStatus status;
-
-    private LocalDate enrollmentDate;
 
     @CreatedDate
     private LocalDateTime createdAt;

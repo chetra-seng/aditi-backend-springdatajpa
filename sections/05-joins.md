@@ -1,3 +1,6 @@
+---
+layout: center
+---
 # Joins & Relationships
 
 ## Connecting Tables Together

@@ -1,3 +1,6 @@
+---
+layout: center
+---
 # Query Methods
 
 ## Derived Queries and JPQL

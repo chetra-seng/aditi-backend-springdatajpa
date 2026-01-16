@@ -1,3 +1,6 @@
+---
+layout: center
+---
 # Indexes & Transactions
 
 ## Performance and Data Integrity
@@ -176,22 +179,110 @@ SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
 ---
 
-# Row Locking
+# Row Locking - What and Why?
+
+**Problem:** Two transactions trying to update the same row simultaneously
+
+**Solution:** Lock rows to prevent conflicts
+
+<v-clicks>
+
+**When you need it:**
+- Banking: Prevent double-spending
+- Inventory: Prevent overselling
+- Job Queues: One worker per task
+
+**Lock Types:**
+- `FOR UPDATE` - Exclusive lock, blocks other locks
+- `FOR SHARE` - Shared lock, allows other reads
+- `SKIP LOCKED` - Skip already locked rows
+- `NOWAIT` - Fail immediately if locked
+
+</v-clicks>
+
+---
+
+# Row Locking Examples
 
 ```sql
--- DML: Lock rows for update
+-- DML: FOR UPDATE - Exclusive lock
 BEGIN;
 SELECT * FROM accounts WHERE id = 1 FOR UPDATE;
--- Other transactions wait for this row
+-- Other transactions WAIT until this commits
 UPDATE accounts SET balance = balance + 50 WHERE id = 1;
 COMMIT;
 
--- DML: Skip locked rows (useful for job queues)
+-- DML: SKIP LOCKED - Don't wait for locked rows
 SELECT * FROM tasks
 WHERE status = 'pending'
 FOR UPDATE SKIP LOCKED
 LIMIT 1;
+-- Returns first unlocked task (perfect for job queues!)
 ```
+
+---
+
+# Real-World Scenario: Job Queue
+
+**Multiple Workers Processing Tasks:**
+
+```sql
+-- Worker 1 picks up first available task (id=123)
+BEGIN;
+SELECT * FROM jobs WHERE status = 'pending'
+FOR UPDATE SKIP LOCKED LIMIT 1;
+-- Returns: id=123 (now LOCKED by Worker 1)
+
+UPDATE jobs SET status = 'processing', worker_id = 1 WHERE id = 123;
+-- ... Worker 1 processing job 123 ...
+```
+
+```sql
+-- Worker 2 runs THE SAME QUERY at the same time
+BEGIN;
+SELECT * FROM jobs WHERE status = 'pending'
+FOR UPDATE SKIP LOCKED LIMIT 1;
+-- Returns: id=124 (SKIPS locked id=123, gets next one!)
+
+UPDATE jobs SET status = 'processing', worker_id = 2 WHERE id = 124;
+-- ... Worker 2 processing job 124 ...
+```
+
+---
+
+# SKIP LOCKED - The Difference
+
+<div class="grid grid-cols-2 gap-4">
+<div>
+
+**WITHOUT `SKIP LOCKED`:**
+```
+Worker 1: Gets job 123, locks it
+Worker 2: Tries to get job 123...
+          WAITS... WAITS...
+          (blocked until Worker 1 done)
+```
+❌ Only one worker active at a time
+
+</div>
+<div>
+
+**WITH `SKIP LOCKED`:**
+```
+Worker 1: Gets job 123, locks it
+Worker 2: Skips job 123 (locked)
+          Gets job 124 immediately!
+```
+✅ Both workers active simultaneously
+
+</div>
+</div>
+
+<v-click>
+
+**Key Point:** `SKIP LOCKED` enables parallel processing by skipping over rows that are already locked by other transactions.
+
+</v-click>
 
 ---
 
